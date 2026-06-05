@@ -80,11 +80,20 @@ async def manejar_trafico_mixto(reader, writer):
         writer.close()
         await writer.wait_closed()
 
+async def heartbeat():
+    """Imprime un heartbeat cada 60 segundos para mostrar que el servidor está vivo"""
+    while True:
+        await asyncio.sleep(60)
+        print("[*] Servidor activo - esperando conexiones GPS...", flush=True)
+
 async def main():
     servidor = await asyncio.start_server(manejar_trafico_mixto, HOST, PORT)
     print(f"[*] GNXIS Server running on {HOST}:{PORT}")
     print(f"[*] Waiting for GPS trackers to connect...")
     print(f"[*] Health check disponible en http://{HOST}:{PORT}/", flush=True)
+    
+    # Iniciar heartbeat en background
+    asyncio.create_task(heartbeat())
     
     async with servidor:
         await servidor.serve_forever()
