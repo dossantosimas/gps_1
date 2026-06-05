@@ -1,7 +1,12 @@
 import asyncio
 import os
+import sys
 
-# Puerto dinámico asignado por Railway (usualmente 8080)
+# Desactivar buffering para que Railway vea los logs inmediatamente
+sys.stdout.reconfigure(line_buffering=True)
+sys.stderr.reconfigure(line_buffering=True)
+
+# Puerto dinámico asignado por Railway
 PORT = int(os.environ.get("PORT", 8080))
 HOST = "0.0.0.0"
 
@@ -62,12 +67,20 @@ async def manejar_trafico_mixto(reader, writer):
         await writer.wait_closed()
 
 async def main():
-    # El servidor ahora escucha peticiones HTTP y TCP en el mismo puerto
     servidor = await asyncio.start_server(manejar_trafico_mixto, HOST, PORT)
-    print(f"[*] Servidor Híbrido Activo en Puerto: {PORT}")
+    print(f"[*] GNXIS Server running on {HOST}:{PORT}")
+    print(f"[*] Waiting for GPS trackers to connect...")
+    print(f"[*] Health check disponible en http://{HOST}:{PORT}/", flush=True)
     
     async with servidor:
         await servidor.serve_forever()
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    print("[*] Iniciando servidor GNXIS...", flush=True)
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("[*] Servidor detenido por el usuario")
+    except Exception as e:
+        print(f"[!] Error fatal: {e}", flush=True)
+        sys.exit(1)

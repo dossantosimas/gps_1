@@ -1,1 +1,1 @@
-web: python g_main1.py
+web: python -u g_main1.py
