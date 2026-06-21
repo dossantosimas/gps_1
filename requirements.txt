@@ -1,1 +1,2 @@
 # No external dependencies needed - using only Python standard library
+asyncpg>=0.27.0
