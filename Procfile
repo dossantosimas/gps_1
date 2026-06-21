@@ -1,1 +1,1 @@
-web: python scripts/init_db.py && python -u g_main2.py
+web: python -u g_main2.py
