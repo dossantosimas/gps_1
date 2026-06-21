@@ -206,9 +206,13 @@ async def manejar_trafico_mixto(reader, writer):
                 
                 # Parsear datos GT06
                 info = parsear_gt06(datos)
+                if imei_dispositivo:
+                    info_db = {**info, 'imei': imei_dispositivo}
+                else:
+                    info_db = dict(info)
                 if info.get('tipo') != 'no_gt06' and db_pool:
                     try:
-                        await registrar_trama(db_pool, direccion, datos, info)
+                        await registrar_trama(db_pool, direccion, datos, info_db)
                     except Exception as err:
                         print(f"[DB] No se pudo registrar la trama: {err}", flush=True)
                 
