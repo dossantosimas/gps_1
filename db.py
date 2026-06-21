@@ -1,4 +1,3 @@
-import json
 import os
 from typing import Any, Dict, Optional, Tuple
 
@@ -35,7 +34,7 @@ async def _ensure_schema(pool: asyncpg.Pool) -> None:
     async with pool.acquire() as conn:
         await conn.execute(
             """
-            CREATE TABLE IF NOT EXISTS frames (
+            CREATE TABLE IF NOT EXISTS frames_tabla (
                 id BIGSERIAL PRIMARY KEY,
                 received_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
                 peer_ip TEXT,
@@ -47,7 +46,15 @@ async def _ensure_schema(pool: asyncpg.Pool) -> None:
                 protocolo_id TEXT,
                 tipo TEXT,
                 imei TEXT,
-                parsed JSONB
+                fecha TEXT,
+                hora TEXT,
+                satelites INTEGER,
+                gps_fijo BOOLEAN,
+                latitud DOUBLE PRECISION,
+                longitud DOUBLE PRECISION,
+                velocidad INTEGER,
+                curso INTEGER,
+                error_parsing TEXT
             );
             """
         )
@@ -57,7 +64,7 @@ async def _ensure_schema(pool: asyncpg.Pool) -> None:
             CREATE TABLE IF NOT EXISTS devices (
                 imei TEXT PRIMARY KEY,
                 last_seen TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-                last_frame_id BIGINT REFERENCES frames(id)
+                last_frame_id BIGINT REFERENCES frames_tabla(id)
             );
             """
         )
@@ -86,12 +93,20 @@ async def registrar_trama(
     protocolo_id = info.get("protocolo_id")
     tipo = info.get("tipo")
     imei = info.get("imei")
+    fecha = info.get("fecha")
+    hora = info.get("hora")
+    satelites = info.get("satelites")
+    gps_fijo = info.get("gps_fijo")
+    latitud = info.get("latitud")
+    longitud = info.get("longitud")
+    velocidad = info.get("velocidad")
+    curso = info.get("curso")
+    error_parsing = info.get("error_parsing")
 
-    parsed_payload = json.dumps(info, default=str)
     async with pool.acquire() as conn:
         frame_id = await conn.fetchval(
             """
-            INSERT INTO frames (
+            INSERT INTO frames_tabla (
                 peer_ip,
                 peer_port,
                 raw_hex,
@@ -101,9 +116,17 @@ async def registrar_trama(
                 protocolo_id,
                 tipo,
                 imei,
-                parsed
+                fecha,
+                hora,
+                satelites,
+                gps_fijo,
+                latitud,
+                longitud,
+                velocidad,
+                curso,
+                error_parsing
             )
-            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+            VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
             RETURNING id
             """,
             peer_ip,
@@ -115,7 +138,15 @@ async def registrar_trama(
             protocolo_id,
             tipo,
             imei,
-                parsed_payload,
+            fecha,
+            hora,
+            satelites,
+            gps_fijo,
+            latitud,
+            longitud,
+            velocidad,
+            curso,
+            error_parsing,
         )
 
         if imei:
