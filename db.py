@@ -1,3 +1,4 @@
+import json
 import os
 from typing import Any, Dict, Optional, Tuple
 
@@ -86,6 +87,7 @@ async def registrar_trama(
     tipo = info.get("tipo")
     imei = info.get("imei")
 
+    parsed_payload = json.dumps(info, default=str)
     async with pool.acquire() as conn:
         frame_id = await conn.fetchval(
             """
@@ -113,7 +115,7 @@ async def registrar_trama(
             protocolo_id,
             tipo,
             imei,
-            info,
+                parsed_payload,
         )
 
         if imei:
