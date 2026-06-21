@@ -81,7 +81,7 @@ async def registrar_trama(
             pass
 
     raw_hex = datos.hex().upper()
-    ascii_text = datos.decode("ascii", errors="replace")
+    ascii_text = datos.decode("latin1", errors="replace").replace("\x00", "")
     frame_length = len(datos)
     protocolo_id = info.get("protocolo_id")
     tipo = info.get("tipo")
