@@ -206,7 +206,7 @@ async def manejar_trafico_mixto(reader, writer):
                 
                 # Parsear datos GT06
                 info = parsear_gt06(datos)
-                if db_pool:
+                if info.get('tipo') != 'no_gt06' and db_pool:
                     try:
                         await registrar_trama(db_pool, direccion, datos, info)
                     except Exception as err:
